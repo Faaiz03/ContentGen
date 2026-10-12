@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContentGen — URL → Viral Social Content</title>
+    <meta name="description" content="Transform any article URL into high-performing hooks and social media scripts using AI.">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- History Sidebar -->
+    <aside id="history-sidebar" class="history-sidebar collapsed">
+        <div class="history-toggle" id="history-toggle-btn" title="History">
+            <i data-lucide="clock"></i>
+            <span class="history-toggle-label">History</span>
+            <span id="history-count-badge" class="history-count hidden">0</span>
+        </div>
+        <div class="history-panel-inner">
+            <div class="history-header">
+                <div class="history-title">
+                    <i data-lucide="clock"></i>
+                    <h3>Generation History</h3>
+                </div>
+                <button id="history-clear-btn" class="history-clear-btn" title="Clear all history">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            </div>
+            <div id="history-list" class="history-list">
+                <p class="history-empty">No history yet. Generate your first idea batch!</p>
+            </div>
+        </div>
+    </aside>
+
+    <div class="container">
+        <header class="hero">
+            <div class="hero-badge">AI Content Generator</div>
+            <h1>Transform Articles into <br><span class="text-gradient">Viral Social Content</span></h1>
+            <p>Paste any URL and let our advanced LLM extract, analyze, and generate high-performing hooks and scripts tailored for your platforms.</p>
+        </header>
+
+        <main>
+            <form id="generate-form" class="main-form">
+                <div class="search-bar-wrapper">
+                    <input type="url" id="url" name="url" placeholder="Paste article URL here (e.g. https://...)" autocomplete="off">
+                    <button type="submit" id="submit-btn" class="primary-btn">
+                        <i data-lucide="sparkles"></i> Generate
+                    </button>
+                </div>
+                
+                <div id="fallback-input" class="hidden fallback-panel">
+                    <p class="error-msg" id="url-error"></p>
+                    <textarea id="pasted-text" rows="6" placeholder="URL fetch failed. Paste the article text manually here..."></textarea>
+                    <button type="button" id="fallback-submit-btn" class="primary-btn w-full">Generate from Text</button>
+                </div>
+
+                <div class="settings-panel">
+                    <div class="settings-header">
+                        <h3>Configuration</h3>
+                        <span>Fine-tune your output</span>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <div class="setting-group platform-group">
+                            <label>Platforms</label>
+                            <div class="pill-group">
+                                <label class="pill-checkbox">
+                                    <input type="checkbox" name="platforms" value="reel" checked>
+                                    <span class="pill-label"><i data-lucide="video"></i> Reel</span>
+                                </label>
+                                <label class="pill-checkbox">
+                                    <input type="checkbox" name="platforms" value="tiktok">
+                                    <span class="pill-label"><i data-lucide="music-2"></i> TikTok</span>
+                                </label>
+                                <label class="pill-checkbox">
+                                    <input type="checkbox" name="platforms" value="short">
+                                    <span class="pill-label"><i data-lucide="play-square"></i> Short</span>
+                                </label>
+                                <label class="pill-checkbox">
+                                    <input type="checkbox" name="platforms" value="carousel">
+                                    <span class="pill-label"><i data-lucide="gallery-horizontal"></i> Carousel</span>
+                                </label>
+                                <label class="pill-checkbox">
+                                    <input type="checkbox" name="platforms" value="linkedin">
+                                    <span class="pill-label"><i data-lucide="linkedin"></i> LinkedIn</span>
+                                </label>
+                                <label class="pill-checkbox">
+                                    <input type="checkbox" name="platforms" value="x_post">
+                                    <span class="pill-label"><i data-lucide="twitter"></i> X</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-row">
+                            <div class="setting-group">
+                                <label for="tone">Tone of Voice</label>
+                                <div class="select-wrapper">
+                                    <select id="tone" name="tone">
+                                        <option value="educational">Educational</option>
+                                        <option value="punchy" selected>Punchy &amp; Direct</option>
+                                        <option value="storytelling">Storytelling</option>
+                                        <option value="funny">Humorous</option>
+                                        <option value="professional">Professional</option>
+                                        <option value="contrarian">Contrarian</option>
+                                    </select>
+                                    <i data-lucide="chevron-down" class="select-icon"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label for="num_ideas">Output Count</label>
+                                <div class="number-wrapper">
+                                    <input type="number" id="num_ideas" name="num_ideas" value="3" min="1" max="10">
+                                    <span class="number-suffix">Ideas</span>
+                                </div>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label for="audience">Target Audience <span class="badge-optional">Optional</span></label>
+                                <input type="text" id="audience" name="audience" class="glass-input" placeholder="e.g. B2B Founders">
+                            </div>
+                        </div>
+
+                        <!-- Custom Brand Voice -->
+                        <div class="setting-group brand-voice-group">
+                            <label for="brand_voice">
+                                <span class="label-with-icon"><i data-lucide="mic-2"></i> Brand Voice / Custom Instructions</span>
+                                <span class="badge-optional">Optional</span>
+                            </label>
+                            <textarea
+                                id="brand_voice"
+                                name="brand_voice"
+                                class="glass-input brand-voice-input"
+                                rows="3"
+                                placeholder='e.g. "Write in the style of Alex Hormozi. Always mention my product ContentGen. Keep hooks under 8 seconds."'
+                            ></textarea>
+                            <div class="brand-voice-presets">
+                                <span class="presets-label">Quick Presets:</span>
+                                <button type="button" class="preset-chip" data-preset="Write in the style of Alex Hormozi. Use power words and bold claims backed by data.">Alex Hormozi</button>
+                                <button type="button" class="preset-chip" data-preset="Write like MrBeast. Start with extreme curiosity hooks. Keep it high energy and surprising.">MrBeast Energy</button>
+                                <button type="button" class="preset-chip" data-preset="Professional and authoritative. Suitable for C-suite executives. Avoid slang.">Corporate Pro</button>
+                                <button type="button" class="preset-chip" data-preset="Casual, relatable, and conversational. Write like you're talking to a friend.">Conversational</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div id="loading" class="hidden">
+                <div class="loader-container">
+                    <div class="pulse-ring"></div>
+                    <div class="loader-core">
+                        <i data-lucide="brain-circuit"></i>
+                    </div>
+                </div>
+                <h3 class="loading-text" id="loading-text">Analyzing &amp; Synthesizing...</h3>
+                <p class="loading-sub" id="loading-sub">Extracting core thesis and generating multi-platform concepts.</p>
+            </div>
+
+            <div id="results" class="hidden">
+                <div class="results-header">
+                    <div>
+                        <h2 id="article-title"></h2>
+                        <div class="thesis-box">
+                            <span class="thesis-label">CORE THESIS</span>
+                            <p id="article-thesis"></p>
+                        </div>
+                    </div>
+                    <div class="results-actions">
+                        <button id="copy-all-btn" class="outline-btn">
+                            <i data-lucide="copy"></i> Copy All MD
+                        </button>
+                        <!-- Export Dropdown -->
+                        <div class="export-dropdown-wrapper" id="export-dropdown-wrapper">
+                            <button class="outline-btn export-trigger-btn" id="export-trigger-btn">
+                                <i data-lucide="download"></i> Export
+                                <i data-lucide="chevron-down" class="chevron-icon"></i>
+                            </button>
+                            <div class="export-dropdown" id="export-dropdown">
+                                <button class="export-option" id="export-txt-btn">
+                                    <i data-lucide="file-text"></i>
+                                    <div>
+                                        <strong>Plain Text</strong>
+                                        <span>Simple .txt file</span>
+                                    </div>
+                                </button>
+                                <button class="export-option" id="export-md-btn">
+                                    <i data-lucide="file-code-2"></i>
+                                    <div>
+                                        <strong>Markdown</strong>
+                                        <span>Formatted .md file</span>
+                                    </div>
+                                </button>
+                                <button class="export-option" id="export-csv-btn">
+                                    <i data-lucide="table"></i>
+                                    <div>
+                                        <strong>CSV Spreadsheet</strong>
+                                        <span>Open in Excel or Sheets</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="credit-note"><i data-lucide="info"></i> Remember to credit the original source when quoting directly.</p>
+
+                <div class="results-grid" id="ideas-container"></div>
+                
+                <div class="extra-content">
+                    <div class="insight-card quote-cards">
+                        <div class="insight-header">
+                            <i data-lucide="quote"></i>
+                            <h3>Pull Quotes</h3>
+                        </div>
+                        <div id="quotes-container"></div>
+                    </div>
+                    <div class="insight-card reaction-angles">
+                        <div class="insight-header">
+                            <i data-lucide="message-square-plus"></i>
+                            <h3>Reaction Angles</h3>
+                        </div>
+                        <div id="reactions-container"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Built with Flask &amp; Groq — ContentGen</p>
+        </footer>
+    </div>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
